@@ -1,17 +1,26 @@
 use darling::{FromDeriveInput, FromMeta};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{parse::{Parse, ParseStream, Result as ParseResult}, DeriveInput, Field, Ident, ItemStruct, Path};
-use crate::custom_model::{CustomModel, CustomModelArgs};
+use syn::{
+  parse::{Parse, ParseStream, Result as ParseResult},
+  Data, DataStruct, DeriveInput, Field, Ident, Path,
+};
+use crate::custom_model::{CustomModelDef, CustomModelArgs};
 
-pub struct DeriveCustomModel {
+pub struct CustomModel {
   custom_model_args: CustomModelArgs,
-  item_struct: ItemStruct,
+  data_struct: DataStruct,
 }
 
-impl Parse for DeriveCustomModel {
+impl Parse for CustomModel {
   fn parse(input: ParseStream) -> ParseResult<Self> {
-    let custom_model_args = match CustomModelArgs::from_derive_input(&<DeriveInput as Parse>::parse(input)?) {
+    let derive_input = <DeriveInput as Parse>::parse(input)?;
+    let Data::Struct(data_struct) = derive_input.data.clone() else {
+      panic!("DeriveCustomModel can only be used with named structs")
+    };
+    
+
+    let custom_model_args = match CustomModelArgs::from_derive_input(&derive_input) {
       Ok(v) => v,
       Err(err) => {
         // If darling returned an error, generate a token stream from it so that the compiler
@@ -22,13 +31,13 @@ impl Parse for DeriveCustomModel {
 
     Ok(Self {
       custom_model_args,
-      item_struct: <ItemStruct as Parse>::parse(input)?,
+      data_struct,
     })
   }
 }
 
-impl DeriveCustomModel {
-  fn generate(&self) -> TokenStream {
+impl CustomModel {
+  pub fn generate(&self) -> TokenStream {
     let CustomModelArgs { models } = &self.custom_model_args;
     let mut output = quote! {};
 
@@ -42,14 +51,14 @@ impl DeriveCustomModel {
       output.extend(quote! {#generated_model});
     }
 
-    todo!()
+    output
   }
 
-  fn generate_custom_model(&self, model: &CustomModel) -> TokenStream {
-    let CustomModel {name, fields: target_fields, extra_derives} = model;
+  fn generate_custom_model(&self, model: &CustomModelDef) -> TokenStream {
+    let CustomModelDef {name, fields: target_fields, extra_derives} = model;
     let mut new_fields = quote! {};
 
-    for field in &self.item_struct.fields {
+    for field in &self.data_struct.fields {
       let Field {
         // The identifier for this field
         ident,
@@ -86,7 +95,7 @@ impl DeriveCustomModel {
       new_fields.extend(quote! {
         // any attribute applied to this field
         #(#attrs)*
-        #vis #ident #colon_token #ty
+        #vis #ident #colon_token #ty,
       });
     }
 
@@ -94,7 +103,7 @@ impl DeriveCustomModel {
       Ok(ident) => ident,
       Err(error) => panic!("{error:?}"),
     };
-
+    
     let mut extra_derives_output = quote! {};
     if !extra_derives.is_empty() {
       extra_derives_output.extend(quote! {
@@ -111,13 +120,13 @@ impl DeriveCustomModel {
   }
 } 
 
-impl From<&DeriveCustomModel> for TokenStream {
-  fn from(parser: &DeriveCustomModel) -> Self {
+impl From<&CustomModel> for TokenStream {
+  fn from(parser: &CustomModel) -> Self {
     parser.generate()
   }
 }
 
-impl ToTokens for DeriveCustomModel {
+impl ToTokens for CustomModel {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     tokens.extend::<TokenStream>(self.into());
   }

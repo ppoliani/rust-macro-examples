@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 init_string_hash_map = { path = "../derive/init_string_hash_map" }
+custom_model = { path = "../derive/custom_model" }
