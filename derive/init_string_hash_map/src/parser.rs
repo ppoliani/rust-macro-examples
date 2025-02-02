@@ -12,6 +12,8 @@ impl InitStringHashMapParser {
     .collect::<Vec<_>>();
 
     quote! {
+      use std::collections::HashMap;
+
       impl From<#struct_ident> for HashMap<String, String> {
         fn from(value: #struct_ident) -> Self {
           let mut hash_map = HashMap::<String, String>::new();
@@ -34,7 +36,7 @@ impl InitStringHashMapParser {
           /// }
           /// ```
           #(
-            hash_map.insert(stringify!(#field_idents), value.#field_idents);
+            hash_map.insert(stringify!(#field_idents).to_string(), value.#field_idents);
           )*
 
           hash_map
