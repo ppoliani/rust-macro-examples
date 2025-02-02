@@ -11,7 +11,6 @@ struct CachedParams {
   keygen: Option<Expr>,
 }
 
-
 pub(crate) fn memoize_impl(args: TokenStream, input: TokenStream) -> TokenStream {
   let attr_args = match NestedMeta::parse_meta_list(args.into()) {
     Ok(v) => v,
@@ -41,31 +40,36 @@ pub(crate) fn memoize_impl(args: TokenStream, input: TokenStream) -> TokenStream
       let __cache_key = #keygen;
     }
   } else {
-     // If no `keygen` was provided, use the name of the function as cache key.
-     let fn_name = sig.ident.to_string();
-     quote! {
+    // If no `keygen` was provided, use the name of the function as cache key.
+    let fn_name = sig.ident.to_string();
+    quote! {
       let __cache_key = #fn_name;
-     }
+    }
   };
 
   quote! {
-    use std::collections::HashMap;
-    let cache = HashMap::<String, Vec<u8>>new();
+    use std::{collections::HashMap, sync::LazyLock, str::from_utf8, sync::RwLock};
+
+    static CACHE: LazyLock<RwLock<HashMap<String, Vec<u8>>>> = LazyLock::new(|| {
+      RwLock::new(HashMap::new())
+    });
 
     #(#attrs)*
     #vis #sig {
       // we need to add __cache_key to local scope
       #key_statement
 
-      if cache.contains_key(&__cache_key) {
-        from_utf8(&value).unwrap().to_string()
-      } else {
+      let mut cache = CACHE.write().unwrap();
+      let Some(value) = cache.get(&__cache_key) else {
+        println!("Data is not fetched from cached");
         let output = #block;
-
         cache.insert(__cache_key, output.as_bytes().to_vec());
+        
+        return output
+      };
 
-        output
-      }
+      println!("Data is fetched from cached");
+      from_utf8(value).unwrap().to_string()
     }
   }.into()
 }

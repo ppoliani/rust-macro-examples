@@ -9,6 +9,7 @@ dependencies = [
  "custom_model",
  "init_string_hash_map",
  "log_duration",
+ "memoize",
 ]
 
 [[package]]
