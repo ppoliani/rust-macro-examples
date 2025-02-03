@@ -1,13 +1,13 @@
 [package]
-name = "hash_mapify"
+name = "manager_of_thing"
 version = "0.1.0"
 edition = "2021"
+
 
 [lib]
 proc-macro = true
 
 [dependencies]
 proc-macro2 = "1.0.93"
-darling = "0.20.10"
 quote = "1.0.38"
 syn = "2.0.98"

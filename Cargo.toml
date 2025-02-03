@@ -1,7 +1,7 @@
 [workspace]
 members = [
   "app", "attribute/log_duration", "attribute/memoize",
-  "derive/*", "function/constant_string", "function/hash_mapify",
+  "derive/*", "function/constant_string", "function/hash_mapify", "function/manager_of_thing", "macro-utils",
 ]
 resolver = "2"
 
