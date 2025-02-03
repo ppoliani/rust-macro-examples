@@ -8,3 +8,4 @@ init_string_hash_map = { path = "../derive/init_string_hash_map" }
 custom_model = { path = "../derive/custom_model" }
 log_duration = { path = "../attribute/log_duration" }
 memoize = { path = "../attribute/memoize" }
+constant_string = { path = "../function/constant_string" }

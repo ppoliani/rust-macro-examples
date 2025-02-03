@@ -6,10 +6,20 @@ version = 4
 name = "app"
 version = "0.1.0"
 dependencies = [
+ "constant_string",
  "custom_model",
  "init_string_hash_map",
  "log_duration",
  "memoize",
+]
+
+[[package]]
+name = "constant_string"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
