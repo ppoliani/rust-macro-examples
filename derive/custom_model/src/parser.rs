@@ -37,23 +37,6 @@ impl Parse for CustomModel {
 }
 
 impl CustomModel {
-  pub fn generate(&self) -> TokenStream {
-    let CustomModelArgs { models } = &self.custom_model_args;
-    let mut output = quote! {};
-
-    // panic if no models are defined
-    if models.is_empty() {
-      panic!("No models defined for derive_custom_model");
-    }
-
-    for model in models {
-      let generated_model = self.generate_custom_model(model);
-      output.extend(quote! {#generated_model});
-    }
-
-    output
-  }
-
   fn generate_custom_model(&self, model: &CustomModelDef) -> TokenStream {
     let CustomModelDef {name, fields: target_fields, extra_derives} = model;
     let mut new_fields = quote! {};
@@ -118,16 +101,23 @@ impl CustomModel {
       }
     }
   }
-} 
-
-impl From<&CustomModel> for TokenStream {
-  fn from(parser: &CustomModel) -> Self {
-    parser.generate()
-  }
 }
 
 impl ToTokens for CustomModel {
   fn to_tokens(&self, tokens: &mut TokenStream) {
-    tokens.extend::<TokenStream>(self.into());
+    let CustomModelArgs {models} = &self.custom_model_args;
+    let mut output = quote! {};
+
+    // panic if no models are defined
+    if models.is_empty() {
+      panic!("No models defined for derive_custom_model");
+    }
+
+    for model in models {
+      let generated_model = self.generate_custom_model(model);
+      output.extend(quote! {#generated_model});
+    }
+
+    tokens.extend::<TokenStream>(output);
   }
 }

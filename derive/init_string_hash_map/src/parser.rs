@@ -2,16 +2,24 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{parse::{Parse, ParseStream, Result as ParseResult}, ItemStruct};
 
-pub struct InitStringHashMapParser(ItemStruct);
+pub struct InitStringHashMap(ItemStruct);
 
-impl InitStringHashMapParser {
-  fn generate(&self) -> TokenStream {
+
+impl Parse for InitStringHashMap {
+  fn parse(input: ParseStream) -> ParseResult<Self> {
+    let strct = <ItemStruct as Parse>::parse(input)?;
+    Ok(Self(strct))
+  }
+}
+
+impl ToTokens for InitStringHashMap {
+  fn to_tokens(&self, tokens: &mut TokenStream) {
     let struct_ident = &self.0.ident;
     let field_idents = self.0.fields.iter()
     .map(|f| f.ident.as_ref().expect("have field"))
     .collect::<Vec<_>>();
 
-    quote! {
+    let output = quote! {
       use std::collections::HashMap;
 
       impl From<#struct_ident> for HashMap<String, String> {
@@ -42,25 +50,8 @@ impl InitStringHashMapParser {
           hash_map
         }
       }
-    }
-  }
-} 
+    };
 
-impl Parse for InitStringHashMapParser {
-  fn parse(input: ParseStream) -> ParseResult<Self> {
-    let strct = <ItemStruct as Parse>::parse(input)?;
-    Ok(Self(strct))
-  }
-}
-
-impl From<&InitStringHashMapParser> for TokenStream {
-  fn from(parser: &InitStringHashMapParser) -> Self {
-    parser.generate()
-  }
-}
-
-impl ToTokens for InitStringHashMapParser {
-  fn to_tokens(&self, tokens: &mut TokenStream) {
-    tokens.extend::<TokenStream>(self.into());
+    tokens.extend::<TokenStream>(output);
   }
 }
