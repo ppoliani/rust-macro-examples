@@ -21,8 +21,8 @@ impl TypeExt for Type {
     let Type::Path(type_path) = self else {
       return None
     };
-
-    type_path.path.get_ident().map(|i| i.clone())
+    
+    type_path.path.segments.first().map(|s| s.ident.clone())
   }
   
   fn has_angle_bracketed_generic_args(&self) -> bool {

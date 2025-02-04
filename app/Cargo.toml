@@ -10,3 +10,4 @@ log_duration = { path = "../attribute/log_duration" }
 memoize = { path = "../attribute/memoize" }
 constant_string = { path = "../function/constant_string" }
 hash_mapify = { path = "../function/hash_mapify" }
+manager_of_thing = { path = "../function/manager_of_thing" }

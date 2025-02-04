@@ -41,11 +41,11 @@ impl Parse for ManagerOfThing {
 
     if let Some(idents) = &manager_ty.get_angle_bracketed_generic_args_idents() {
       let _where = quote! {
-        where #(#idents: Send + Sync + 'static)*;
+        where #(#idents: Send + Sync + 'static),*
       };
       where_clause = Some(syn::parse(_where.into()).unwrap());
     }
-
+    
     input.parse::<Token![for]>()?;
     let thing_ty = input.parse::<Type>()?;
     let manager_name_ident = thing_ty.get_ident().expect("Expected Type::Path::TypePath.segments to have an Ident");
@@ -71,6 +71,7 @@ impl ToTokens for ManagerOfThing {
     let doc_str = format!("Generated manager {}.", &manager_name_ident);
     let output = quote! {
       #[doc = #doc_str]
+      #[derive(Debug)]
       struct #manager_ty #where_clause {
         wrapped_thing: #thing_ty
       }
