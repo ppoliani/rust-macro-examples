@@ -1,6 +1,6 @@
 use quote::{quote, ToTokens};
 use proc_macro2::TokenStream;
-use syn::{parse::{Parse, ParseStream}, punctuated::Punctuated, token::Comma, GenericArgument, Ident, Token, Type, WhereClause};
+use syn::{parse::{Parse, ParseStream}, Ident, Token, Type, WhereClause};
 use macro_utils::type_ext::TypeExt;
 
 /// 
@@ -25,7 +25,6 @@ use macro_utils::type_ext::TypeExt;
 pub struct ManagerOfThing {
   manager_name_ident: Ident,
   manager_ty: Type,
-  manager_generic_args: Option<Punctuated<GenericArgument, Comma>>,
   where_clause: Option<WhereClause>,
   thing_ty: Type,
 }
@@ -33,7 +32,6 @@ pub struct ManagerOfThing {
 impl Parse for ManagerOfThing {
   fn parse(input: ParseStream) -> syn::Result<Self> {
     let manager_ty = input.parse::<Type>()?;
-    let manager_generic_args = manager_ty.get_angle_bracketed_generic_args();
     
     // Optional where clause, eg: `where K: Send+Sync+'static, V: Send+Sync+'static`.
     let mut where_clause: Option<WhereClause> = None;
@@ -55,7 +53,6 @@ impl Parse for ManagerOfThing {
     Ok(ManagerOfThing {
       manager_name_ident,
       manager_ty,
-      manager_generic_args,
       where_clause,
       thing_ty,
     })
@@ -64,7 +61,21 @@ impl Parse for ManagerOfThing {
 
 impl ToTokens for ManagerOfThing {
   fn to_tokens(&self, tokens: &mut TokenStream) { 
-    let output = quote! {};
+    let ManagerOfThing {
+      manager_name_ident,
+      manager_ty,
+      thing_ty,
+      where_clause,
+    } = self;
+
+    let doc_str = format!("Generated manager {}.", &manager_name_ident);
+    let output = quote! {
+      #[doc = #doc_str]
+      struct #manager_ty #where_clause {
+        wrapped_thing: #thing_ty
+      }
+    };
+
     tokens.extend::<TokenStream>(output);
   }
 }
