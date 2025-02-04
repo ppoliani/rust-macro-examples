@@ -120,6 +120,7 @@ dependencies = [
 name = "manager_of_thing"
 version = "0.1.0"
 dependencies = [
+ "macro-utils",
  "proc-macro2",
  "quote",
  "syn",

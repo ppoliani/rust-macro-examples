@@ -1,6 +1,7 @@
 use quote::{quote, ToTokens};
 use proc_macro2::TokenStream;
 use syn::{parse::{Parse, ParseStream}, Type, Ident};
+use macro_utils::type_ext::TypeExt;
 
 /// 
 /// ```
@@ -21,7 +22,7 @@ use syn::{parse::{Parse, ParseStream}, Type, Ident};
 ///     wrapped_thing: std::collections::HashMap<K, V>,
 /// }
 /// ```
-struct ManagerOfThing {
+pub struct ManagerOfThing {
   manager_name_ident: Ident,
   manager_ty: Type,
 }
