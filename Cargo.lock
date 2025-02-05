@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "constant_string",
  "custom_model",
+ "describe",
  "hash_mapify",
  "init_string_hash_map",
  "log_duration",

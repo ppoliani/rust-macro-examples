@@ -12,23 +12,22 @@ enum FieldType {
 impl FieldType {
   fn get_struct_description(fields: &Vec<Field>) -> String {
     format!(
-      "A struct with the following fields \n: {}",
+      "a struct with the following fields: {}",
       quote! {
-        #(#fields.ident: #fields.ty),*
+        #(#fields),*
       }
     )
   }
 
   fn get_enum_description(variants: &Vec<Variant>) -> String {
     format!(
-      "An enum with the following variants \n: {}",
+      "an enum with the following variants: {}",
       quote! {
-        #(#variants.ident: #variants.fields.ident: #variants.fields.ty),*
+        #(#variants),*
       }
     )
   }
 }
-
 pub struct Describe {
   field_ty: FieldType,
   ident: Ident,
@@ -73,7 +72,11 @@ impl ToTokens for Describe {
     let output = quote! {
       impl #generics #ident #generics {
         fn describe(&self) -> String {
-          #field_ty
+          let mut descr = String::from(stringify!(#ident));
+          descr.push_str(" is ");
+          descr.push_str(#field_ty);
+
+          descr
         }
       }
     };
