@@ -4,7 +4,6 @@ use syn::{parse::{Parse, ParseStream, Result as ParseResult}, ItemStruct};
 
 pub struct InitStringHashMap(ItemStruct);
 
-
 impl Parse for InitStringHashMap {
   fn parse(input: ParseStream) -> ParseResult<Self> {
     let strct = <ItemStruct as Parse>::parse(input)?;
